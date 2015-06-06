@@ -5,6 +5,8 @@ AllCops:
   Exclude:
     - 'spec/rails_app/**/*'
     - 'spec/spec_helper.rb'
+Metrics/LineLength:
+  Max: 100
 Style/StringLiterals:
   Enabled: false
 Style/EmptyLinesAroundBlockBody:
