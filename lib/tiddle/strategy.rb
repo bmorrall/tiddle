@@ -5,6 +5,8 @@ require 'tiddle/token_issuer'
 module Devise
   module Strategies
     class TokenAuthenticatable < Authenticatable
+      DEFAULT_REFRESH_TIME = 1.hour
+
       def authenticate!
         env["devise.skip_trackable"] = true
 
@@ -49,7 +51,16 @@ module Devise
       end
 
       def touch_token(token)
-        token.update_attribute(:last_used_at, Time.current) if token.last_used_at < 1.hour.ago
+        if token.last_used_at < token_refresh_time.ago
+          token.update_attribute(:last_used_at, Time.current)
+        end
+      end
+
+      def token_refresh_time
+        return DEFAULT_REFRESH_TIME unless token.respond_to?(:expires_in)
+        return DEFAULT_REFRESH_TIME if token.expires_in.blank? || token.expires_in.zero?
+
+        return [DEFAULT_REFRESH_TIME, token.expires_in].minimum
       end
 
       def unexpired?(token)
